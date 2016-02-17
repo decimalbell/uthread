@@ -76,8 +76,6 @@ void uthread_resume(struct uthread_t *thread)
 	default:
 		assert(0);
 	}
-	running->status = UTHREAD_RUNNING;
-	scheduler->running = running;
 }
 
 void uthread_yield(struct uthread_t *thread)
@@ -129,4 +127,8 @@ static void uthread_main(struct uthread_t *thread)
 
 	thread->func(thread->arg);
 	thread->status = UTHREAD_DEAD;
+
+	struct uthread_t *running = thread->prev;
+	running->status = UTHREAD_RUNNING;
+	scheduler->running = running;
 }
