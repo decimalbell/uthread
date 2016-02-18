@@ -7,7 +7,7 @@ static struct scheduler_t *uthread_scheduler(void);
 static void uthread_main(struct uthread_t *thread);
 
 struct uthread_t {
-	struct uthread_t *prev;
+	struct uthread_t *caller;
 	uthread_func func;
 	void *arg;
 	ucontext_t context;
@@ -57,7 +57,7 @@ void uthread_resume(struct uthread_t *thread)
 	int status = thread->status;
 	if (running == thread) return;
 	running->status = UTHREAD_NORMAL;
-	thread->prev = running;
+	thread->caller = running;
 	thread->status = UTHREAD_RUNNING;
 	scheduler->running = thread;
 	switch (status) {
@@ -85,12 +85,12 @@ void uthread_yield(struct uthread_t *thread)
 	assert(thread->status == UTHREAD_RUNNING);
 
 	struct scheduler_t *scheduler = uthread_scheduler();
-	struct uthread_t *prev = thread->prev;
+	struct uthread_t *caller = thread->caller;
 	assert(scheduler->running == thread);
-	prev->status = UTHREAD_RUNNING;
+	caller->status = UTHREAD_RUNNING;
 	thread->status = UTHREAD_SUSPENDED;
-	scheduler->running = prev;
-	swapcontext(&thread->context, &prev->context);
+	scheduler->running = caller;
+	swapcontext(&thread->context, &caller->context);
 }
 
 int uthread_status(struct uthread_t *thread)
@@ -128,7 +128,7 @@ static void uthread_main(struct uthread_t *thread)
 	thread->func(thread->arg);
 	thread->status = UTHREAD_DEAD;
 
-	struct uthread_t *running = thread->prev;
+	struct uthread_t *running = thread->caller;
 	running->status = UTHREAD_RUNNING;
 	scheduler->running = running;
 }
