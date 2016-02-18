@@ -9,7 +9,7 @@ void *foo(void *arg)
 	int i;
 	for (i = 0; i < n; i++) {
 		printf("%s i = %d\n", __func__, i);
-		uthread_yield(uthread_running());
+		uthread_yield();
 	}
 	return NULL;
 }

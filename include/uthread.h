@@ -17,7 +17,7 @@ struct uthread_t;
 
 struct uthread_t *uthread_new(uthread_func func, void *arg);
 void uthread_resume(struct uthread_t *thread);
-void uthread_yield(struct uthread_t *thread);
+void uthread_yield(void);
 int uthread_status(struct uthread_t *thread);
 struct uthread_t *uthread_running(void);
 void uthread_free(struct uthread_t *thread);

@@ -78,19 +78,18 @@ void uthread_resume(struct uthread_t *thread)
 	}
 }
 
-void uthread_yield(struct uthread_t *thread)
+void uthread_yield(void)
 {
-	assert(thread);
-	assert(thread->func);
-	assert(thread->status == UTHREAD_RUNNING);
-
 	struct scheduler_t *scheduler = uthread_scheduler();
-	struct uthread_t *caller = thread->caller;
-	assert(scheduler->running == thread);
+	struct uthread_t *running = scheduler->running;
+	struct uthread_t *caller = running->caller;
+
+	assert(running->func);
+
 	caller->status = UTHREAD_RUNNING;
-	thread->status = UTHREAD_SUSPENDED;
+	running->status = UTHREAD_SUSPENDED;
 	scheduler->running = caller;
-	swapcontext(&thread->context, &caller->context);
+	swapcontext(&running->context, &caller->context);
 }
 
 int uthread_status(struct uthread_t *thread)
